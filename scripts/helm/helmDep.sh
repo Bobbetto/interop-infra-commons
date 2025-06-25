@@ -95,18 +95,32 @@ function setupHelmDeps()
     fi
 
     if [[ $untar == true ]]; then
-        if compgen -G "*.tgz" > /dev/null; then
-            for filename in *.tgz; do 
-                dirname=$(basename "$filename" .tgz)
-                rm -rf "$dirname"
-                mkdir -p "$dirname"
-                tar -xzf "$filename" -C "$dirname" --strip-components=1
-                rm -f "$filename"
-            done
-        fi
+        echo "-- Extracting chart packages --"
+        for tgz in *.tgz; do
+            [ -e "$tgz" ] || continue  # salta se nessun file .tgz
+            dirname=$(tar -tzf "$tgz" | head -1 | cut -f1 -d"/")
+            rm -rf "$dirname"
+            mkdir -p "$dirname"
+            tar -xzf "$tgz" -C "$dirname" --strip-components=1
+            rm -f "$tgz"
+        done
         echo "-- Debugging extracted chart directories --"
         ls -la "$ROOT_DIR/charts"
     fi
+
+    # if [[ $untar == true ]]; then
+    #     if compgen -G "*.tgz" > /dev/null; then
+    #         for filename in *.tgz; do 
+    #             dirname=$(basename "$filename" .tgz)
+    #             rm -rf "$dirname"
+    #             mkdir -p "$dirname"
+    #             tar -xzf "$filename" -C "$dirname" --strip-components=1
+    #             rm -f "$filename"
+    #         done
+    #     fi
+    #     echo "-- Debugging extracted chart directories --"
+    #     ls -la "$ROOT_DIR/charts"
+    # fi
 
     # Pulizia temporanea
     rm -f Chart.yaml
