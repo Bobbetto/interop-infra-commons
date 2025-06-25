@@ -59,14 +59,14 @@ setupHelmDeps() {
     mkdir -p charts_temp
     echo "Copying Chart.yaml to charts_temp"
     cp Chart.yaml charts_temp/
-    
+
 
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
-    helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null || true
-    helm repo add interop-eks-cronjob-chart https://pagopa.github.io/interop-eks-cronjob-chart > /dev/null || true
+    helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null
+    helm repo add interop-eks-cronjob-chart https://pagopa.github.io/interop-eks-cronjob-chart > /dev/null
 
-    echo "-- Update PagoPA eks repos --"
+    echo "-- Update PagoPA eks repo --"
     helm repo update interop-eks-microservice-chart > /dev/null
     helm repo update interop-eks-cronjob-chart > /dev/null
 
