@@ -97,9 +97,9 @@ setupHelmDeps() {
         echo "Files in charts_temp after helm dep up:"
         ls -la charts_temp/charts
 
-        for filename in charts_temp/*.tgz; do
+        for filename in charts_temp/charts/*.tgz; do
             [ -e "$filename" ] || continue
-
+            echo "Processing file: $filename"
             basename_file=$(basename "$filename" .tgz)
 
             if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
