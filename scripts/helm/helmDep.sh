@@ -72,8 +72,8 @@ setupHelmDeps() {
 
     if [[ $verbose == true ]]; then
         echo "-- Search PagoPA charts in repo --"
-        helm search repo interop-eks-microservice-chart
-        helm search repo interop-eks-cronjob-chart
+        #helm search repo interop-eks-microservice-chart
+        #helm search repo interop-eks-cronjob-chart
     else
         helm search repo interop-eks-microservice-chart > /dev/null
         helm search repo interop-eks-cronjob-chart > /dev/null
