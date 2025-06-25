@@ -93,9 +93,9 @@ jobs:
           sparse-checkout: 'scripts/helm'
           ref: ${{ inputs.infra_commons_tag }}
       
-      - name: Install Helm 3.17.3
+      - name: Install Helm 3.18.3
         run: |
-          curl -sSL https://get.helm.sh/helm-v3.17.3-linux-amd64.tar.gz | tar -xz
+          curl -sSL https://get.helm.sh/helm-v3.18.3-linux-amd64.tar.gz | tar -xz
           sudo mv linux-amd64/helm /usr/local/bin/helm
           helm version
 
