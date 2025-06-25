@@ -65,7 +65,7 @@ function setupHelmDeps()
     cd $ROOT_DIR
     
     rm -rf charts
-    rm -rf charts_temp
+    #rm -rf charts_temp
     mkdir -p charts_temp
     echo "Copying Chart.yaml to charts_temp"
     cp Chart.yaml charts_temp/
