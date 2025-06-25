@@ -12,15 +12,6 @@ help() {
 PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
 ROOT_DIR="$PROJECT_DIR"
 
-# # Determina ROOT_DIR staticamente
-# if [[ -f "$PROJECT_DIR/Chart.yaml" ]]; then
-#     ROOT_DIR="$PROJECT_DIR"
-# elif [[ -f "$PROJECT_DIR/chart/Chart.yaml" ]]; then
-#     ROOT_DIR="$PROJECT_DIR/chart"
-# else
-#     echo "[ERROR] Chart.yaml not found in either $PROJECT_DIR or $PROJECT_DIR/chart"
-#     exit 1
-# fi
 
 echo "Using ROOT_DIR: $ROOT_DIR"
 echo "Using PROJECT_DIR: $PROJECT_DIR"
@@ -28,28 +19,32 @@ echo "Using PROJECT_DIR: $PROJECT_DIR"
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "Using SCRIPTS_FOLDER: $SCRIPTS_FOLDER"
 
-# === Arg parsing ===
+
 args=$#
 untar=false
+step=1
 verbose=false
 
-for (( i=0; i<$args; i++ ))
+for (( i=0; i<$args; i+=$step ))
 do
     case "$1" in
         -u| --untar )
             untar=true
-            shift
+          step=1
+          shift 1
             ;;
         -v| --verbose )
             verbose=true
-            shift
+          step=1
+          shift 1
             ;;
-        -h| --help )
+        -h | --help )
             help
             ;;
         *)
             echo "Unexpected option: $1"
             help
+
             ;;
     esac
 done
