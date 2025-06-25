@@ -45,6 +45,11 @@ jobs:
           fetch-depth: 0
           sparse-checkout: 'scripts/helm'
           ref: ${{ inputs.infra_commons_tag }}
+      
+      - name: Debug checkout content
+        run: |
+          echo ">> Listing script folder:"
+          ls -al ./interop-infra-commons/scripts/helm
 
       - name: Helm Chart Linting
         id: helm_lint

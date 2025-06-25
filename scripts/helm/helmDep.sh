@@ -26,7 +26,8 @@ echo "Using ROOT_DIR: $ROOT_DIR"
 echo "Using PROJECT_DIR: $PROJECT_DIR"  
 
 
-SCRIPTS_FOLDER="$(cd "$(dirname \"${BASH_SOURCE[0]}\")" && pwd)"
+SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 
 args=$#
 untar=false
