@@ -10,37 +10,27 @@ help()
     exit 2
 }
 
-PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
-
-# Determina ROOT_DIR in modo statico (senza git)
-if [[ -f "$PROJECT_DIR/Chart.yaml" ]]; then
-    ROOT_DIR="$PROJECT_DIR"
-elif [[ -f "$PROJECT_DIR/chart/Chart.yaml" ]]; then
-    ROOT_DIR="$PROJECT_DIR/chart"
-else
-    echo "[ERROR] Chart.yaml not found in either $PROJECT_DIR or $PROJECT_DIR/chart"
-    exit 1
-fi
-
-echo "Using ROOT_DIR: $ROOT_DIR"
-echo "Using PROJECT_DIR: $PROJECT_DIR"
-
-SCRIPTS_FOLDER="$(cd "$(dirname \"${BASH_SOURCE[0]}\")" && pwd)"
+PROJECT_DIR=${PROJECT_DIR:-$(pwd)}
+ROOT_DIR=$PROJECT_DIR
+SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 args=$#
 untar=false
+step=1
 verbose=false
 
-for (( i=0; i<$args; i++ ))
+for (( i=0; i<$args; i+=$step ))
 do
     case "$1" in
         -u| --untar )
           untar=true
-          shift
+          step=1
+          shift 1
           ;;
         -v| --verbose )
           verbose=true
-          shift
+          step=1
+          shift 1
           ;;
         -h | --help )
           help
@@ -48,21 +38,18 @@ do
         *)
           echo "Unexpected option: $1"
           help
+
           ;;
     esac
 done
 
-setupHelmDeps() 
+function setupHelmDeps() 
 {
-    local untar=$1
+    untar=$1
 
-    cd "$ROOT_DIR"
-
-    rm -rf charts_temp
-    mkdir -p charts_temp
-
-    cp Chart.yaml charts_temp/
-
+    cd $ROOT_DIR
+    
+    rm -rf charts
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
     helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null
@@ -74,72 +61,47 @@ setupHelmDeps()
 
     if [[ $verbose == true ]]; then
         echo "-- Search PagoPA charts in repo --"
-        helm search repo interop-eks-microservice-chart
-        helm search repo interop-eks-cronjob-chart
-    else
-        helm search repo interop-eks-microservice-chart > /dev/null
-        helm search repo interop-eks-cronjob-chart > /dev/null
     fi
-
-    echo "-- Build chart dependencies --"
-    cd charts_temp
+    helm search repo interop-eks-microservice-chart > /dev/null
+    helm search repo interop-eks-cronjob-chart > /dev/null
 
     if [[ $verbose == true ]]; then
-        helm dep list | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
+        echo "-- List chart dependencies --"
     fi
-
-    helm dep up
-
-    cd "$ROOT_DIR"
-    rm -rf charts
-    mkdir -p charts
+    helm dep list | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
+    
+    if [[ $verbose == true ]]; then
+        echo "-- Build chart dependencies --"
+    fi
+    # only first time
+    #helm dep build 
+    dep_up_result=$(helm dep up)
+    if [[ $verbose == true ]]; then
+        echo $dep_up_result
+    fi
 
     if [[ $untar == true ]]; then
-        echo "Files in charts_temp after helm dep up:"
-        ls -la charts_temp
+        cd charts
+        for filename in *.tgz; do 
+            tar -xf "$filename" && rm -f "$filename";
+        done;
 
-        for filename in charts_temp/*.tgz; do
-            [ -e "$filename" ] || continue
-
-            basename_file=$(basename "$filename" .tgz)
-
-            if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
-                target_dir="charts/interop-eks-microservice-chart"
-            elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
-                target_dir="charts/interop-eks-cronjob-chart"
-            else
-                target_dir="charts/$basename_file"
-            fi
-
-            echo "Extracting $filename to $target_dir"
-            mkdir -p "$target_dir"
-            tar -xzf "$filename" -C "$target_dir" --strip-components=1
-
-            echo "Contents of $target_dir:"
-            ls -la "$target_dir"
-        done
-
-        cp charts_temp/Chart.yaml charts/
-        cp charts_temp/Chart.lock charts/
-
-        echo "-- Final charts directory --"
-        ls -laR "$ROOT_DIR/charts"
-    else
-        mv charts_temp/*.tgz charts/ 2>/dev/null || true
-        cp charts_temp/Chart.yaml charts/
-        cp charts_temp/Chart.lock charts/
+        cd ..
     fi
 
-    rm -rf charts_temp
-
     set +e
-    if ! helm plugin list | grep -q "diff"; then
-        helm plugin install https://github.com/databus23/helm-diff
+    # Install helm diff plugin
+    helm plugin install https://github.com/databus23/helm-diff
+    diff_plugin_result=$?
+     if [[ $verbose == true ]]; then
+        echo "Helm-Diff plugin install result: $diff_plugin_result"
     fi
     set -e
 
+    cd -
     echo "-- Helm dependencies setup ended --"
     exit 0
 }
+
 
 setupHelmDeps $untar

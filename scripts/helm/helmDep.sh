@@ -25,6 +25,7 @@ echo "Using ROOT_DIR: $ROOT_DIR"
 echo "Using PROJECT_DIR: $PROJECT_DIR"
 
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "Using SCRIPTS_FOLDER: $SCRIPTS_FOLDER"
 
 # === Arg parsing ===
 args=$#
