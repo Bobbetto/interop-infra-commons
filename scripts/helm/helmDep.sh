@@ -144,7 +144,7 @@ setupHelmDeps() {
     fi
     set -e
 
-    cd -
+    cd "$ROOT_DIR/charts"
     echo "-- Helm dependencies setup ended --"
     exit 0
 }
