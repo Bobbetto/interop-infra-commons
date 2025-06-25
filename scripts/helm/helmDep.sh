@@ -72,13 +72,14 @@ setupHelmDeps() {
 
     if [[ $verbose == true ]]; then
         echo "-- Search PagoPA charts in repo --"
-        #helm search repo interop-eks-microservice-chart
-        #helm search repo interop-eks-cronjob-chart
-    else
+    fi
         helm search repo interop-eks-microservice-chart > /dev/null
         helm search repo interop-eks-cronjob-chart > /dev/null
+        
+    if [[ $verbose == true ]]; then
+        echo "-- List chart dependencies --"
     fi
-
+    helm dep list charts_temp | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
     echo "-- Build chart dependencies --"
     cd charts_temp
 
