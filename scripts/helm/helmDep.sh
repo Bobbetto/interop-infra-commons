@@ -75,19 +75,23 @@ setupHelmDeps() {
     fi
         helm search repo interop-eks-microservice-chart > /dev/null
         helm search repo interop-eks-cronjob-chart > /dev/null
-        
+
     if [[ $verbose == true ]]; then
         echo "-- List chart dependencies --"
     fi
     helm dep list charts_temp | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
-    echo "-- Build chart dependencies --"
+
     cd charts_temp
 
     if [[ $verbose == true ]]; then
-        helm dep list | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
+        echo "-- Build chart dependencies --"
     fi
-
-    helm dep up
+    # only first time
+    #helm dep up
+    dep_up_result=$(helm dep up)
+    if [[ $verbose == true ]]; then
+        echo $dep_up_result
+    fi
 
     cd "$ROOT_DIR"
     rm -rf charts
