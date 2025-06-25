@@ -62,7 +62,7 @@ function setupHelmDeps()
 {
     untar=$1
 
-    cd $ROOT_DIR
+    cd "$ROOT_DIR"
     
     rm -rf charts
     #rm -rf charts_temp
