@@ -95,7 +95,7 @@ setupHelmDeps() {
 
     if [[ $untar == true ]]; then
         echo "Files in charts_temp after helm dep up:"
-        ls -la charts_temp
+        ls -la charts_temp/charts
 
         for filename in charts_temp/*.tgz; do
             [ -e "$filename" ] || continue
