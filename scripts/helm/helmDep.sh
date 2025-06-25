@@ -12,7 +12,6 @@ help() {
 PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
 ROOT_DIR="$PROJECT_DIR"
 
-
 echo "Using ROOT_DIR: $ROOT_DIR"
 echo "Using PROJECT_DIR: $PROJECT_DIR"
 
@@ -49,17 +48,20 @@ do
     esac
 done
 
-setupHelmDeps() {
+function setupHelmDeps() {
     local untar=$1
 
     cd "$ROOT_DIR"
 
     rm -rf charts_temp
-    echo "Creating temporary directory for charts"
+    if [[ $verbose == true ]]; then
+        echo "Creating temporary directory for charts"
+    fi
     mkdir -p charts_temp
-    echo "Copying Chart.yaml to charts_temp"
-    cp Chart.yaml charts_temp/
 
+    if [[ $verbose == true ]]; then
+     echo "Copying Chart.yaml to charts_temp"
+    fi
 
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
@@ -94,7 +96,6 @@ setupHelmDeps() {
     fi
 
     cd "$ROOT_DIR"
-    #rm -rf charts
     mkdir -p charts
 
     if [[ $untar == true ]]; then
@@ -148,13 +149,6 @@ setupHelmDeps() {
     echo "-- Helm dependencies setup ended --"
     exit 0
 }
-#     if ! helm plugin list | grep -q "diff"; then
-#         helm plugin install https://github.com/databus23/helm-diff
-#     fi
-#     set -e
 
-#     echo "-- Helm dependencies setup ended --"
-#     exit 0
-# }
 
 setupHelmDeps $untar
