@@ -58,11 +58,12 @@ function setupHelmDeps()
 
     cd "$ROOT_DIR"
 
-    rm -rf charts
-    mkdir -p charts
+    # Pulizia e creazione directory temporanea
+    rm -rf charts_temp
+    mkdir -p charts_temp
 
-    # Copia Chart.yaml temporaneamente in charts/
-    cp Chart.yaml charts/
+    # Copia Chart.yaml nella directory temporanea
+    cp Chart.yaml charts_temp/
 
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
@@ -83,7 +84,7 @@ function setupHelmDeps()
     fi
 
     echo "-- Build chart dependencies --"
-    cd charts
+    cd charts_temp
 
     if [[ $verbose == true ]]; then
         helm dep list | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
@@ -94,37 +95,59 @@ function setupHelmDeps()
         echo "$dep_up_result"
     fi
 
+    # Ora gestiamo la directory charts finale
+    cd "$ROOT_DIR"
+    rm -rf charts
+    mkdir -p charts
+
     if [[ $untar == true ]]; then
-        echo "-- Extracting chart packages --"
-        for tgz in *.tgz; do
-            [ -e "$tgz" ] || continue  # salta se nessun file .tgz
-            dirname=$(tar -tzf "$tgz" | head -1 | cut -f1 -d"/")
-            rm -rf "$dirname"
-            mkdir -p "$dirname"
-            tar -xzf "$tgz" -C "$dirname" --strip-components=1
-            rm -f "$tgz"
-        done
+        # Estrai i chart nella directory charts finale con i nomi corretti
+        if compgen -G "charts_temp/*.tgz" > /dev/null; then
+            for filename in charts_temp/*.tgz; do 
+                basename_file=$(basename "$filename" .tgz)
+                
+                # Determina il nome corretto della directory basandosi sul nome del file
+                if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
+                    target_dir="charts/interop-eks-microservice-chart"
+                elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
+                    target_dir="charts/interop-eks-cronjob-chart"
+                else
+                    # Fallback: usa il nome del file senza versione
+                    target_dir="charts/$basename_file"
+                fi
+                
+                echo "Extracting $filename to $target_dir"
+                rm -rf "$target_dir"
+                mkdir -p "$target_dir"
+                tar -xzf "$filename" -C "$target_dir" --strip-components=1
+            done
+        fi
+        
+        # Copia anche Chart.yaml e Chart.lock nella directory charts
+        cp charts_temp/Chart.yaml charts/
+        cp charts_temp/Chart.lock charts/
+        
         echo "-- Debugging extracted chart directories --"
         ls -la "$ROOT_DIR/charts"
+        
+        if [[ -d "$ROOT_DIR/charts/interop-eks-microservice-chart" ]]; then
+            echo "Microservice chart contents:"
+            ls -la "$ROOT_DIR/charts/interop-eks-microservice-chart" | head -10
+        fi
+        
+        if [[ -d "$ROOT_DIR/charts/interop-eks-cronjob-chart" ]]; then
+            echo "Cronjob chart contents:"
+            ls -la "$ROOT_DIR/charts/interop-eks-cronjob-chart" | head -10
+        fi
+    else
+        # Se non untar, sposta i .tgz nella directory charts
+        mv charts_temp/*.tgz charts/ 2>/dev/null || true
+        cp charts_temp/Chart.yaml charts/
+        cp charts_temp/Chart.lock charts/
     fi
 
-    # if [[ $untar == true ]]; then
-    #     if compgen -G "*.tgz" > /dev/null; then
-    #         for filename in *.tgz; do 
-    #             dirname=$(basename "$filename" .tgz)
-    #             rm -rf "$dirname"
-    #             mkdir -p "$dirname"
-    #             tar -xzf "$filename" -C "$dirname" --strip-components=1
-    #             rm -f "$filename"
-    #         done
-    #     fi
-    #     echo "-- Debugging extracted chart directories --"
-    #     ls -la "$ROOT_DIR/charts"
-    # fi
-
-    # Pulizia temporanea
-    rm -f Chart.yaml
-    cd ..
+    # Pulizia directory temporanea
+    rm -rf charts_temp
 
     set +e
     if ! helm plugin list | grep -q "diff"; then
