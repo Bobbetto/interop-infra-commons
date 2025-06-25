@@ -55,8 +55,11 @@ setupHelmDeps() {
     cd "$ROOT_DIR"
 
     rm -rf charts_temp
+    echo "Creating temporary directory for charts"
     mkdir -p charts_temp
+    echo "Copying Chart.yaml to charts_temp"
     cp Chart.yaml charts_temp/
+    
 
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
