@@ -22,25 +22,26 @@ else
     exit 1
 fi
 
-SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "Using ROOT_DIR: $ROOT_DIR"
+echo "Using PROJECT_DIR: $PROJECT_DIR"  
+
+
+SCRIPTS_FOLDER="$(cd "$(dirname \"${BASH_SOURCE[0]}\")" && pwd)"
 
 args=$#
 untar=false
-step=1
 verbose=false
 
-for (( i=0; i<$args; i+=$step ))
+for (( i=0; i<$args; i++ ))
 do
     case "$1" in
         -u| --untar )
           untar=true
-          step=1
-          shift 1
+          shift
           ;;
         -v| --verbose )
           verbose=true
-          step=1
-          shift 1
+          shift
           ;;
         -h | --help )
           help
@@ -52,17 +53,15 @@ do
     esac
 done
 
-function setupHelmDeps() 
+setupHelmDeps() 
 {
     local untar=$1
 
     cd "$ROOT_DIR"
 
-    # Pulizia e creazione directory temporanea
     rm -rf charts_temp
     mkdir -p charts_temp
 
-    # Copia Chart.yaml nella directory temporanea
     cp Chart.yaml charts_temp/
 
     echo "# Helm dependencies setup #"
@@ -90,74 +89,53 @@ function setupHelmDeps()
         helm dep list | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
     fi
 
-    dep_up_result=$(helm dep up)
-    if [[ $verbose == true ]]; then
-        echo "$dep_up_result"
-    fi
+    helm dep up
 
-    # Ora gestiamo la directory charts finale
     cd "$ROOT_DIR"
     rm -rf charts
     mkdir -p charts
 
     if [[ $untar == true ]]; then
-        # Estrai i chart nella directory charts finale con i nomi corretti
-        if compgen -G "charts_temp/*.tgz" > /dev/null; then
-            for filename in charts_temp/*.tgz; do 
-                basename_file=$(basename "$filename" .tgz)
-                
-                # Determina il nome corretto della directory basandosi sul nome del file
-                if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
-                    target_dir="charts/interop-eks-microservice-chart"
-                elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
-                    target_dir="charts/interop-eks-cronjob-chart"
-                else
-                    # Fallback: usa il nome del file senza versione
-                    target_dir="charts/$basename_file"
-                fi
-                
-                echo "Extracting $filename to $target_dir"
-                rm -rf "$target_dir"
-                mkdir -p "$target_dir"
-                tar -xzf "$filename" -C "$target_dir" --strip-components=1
-            done
-        fi
-        
-        # Copia anche Chart.yaml e Chart.lock nella directory charts
+        echo "Files in charts_temp after helm dep up:"
+        ls -la charts_temp
+
+        for filename in charts_temp/*.tgz; do
+            [ -e "$filename" ] || continue
+
+            basename_file=$(basename "$filename" .tgz)
+
+            if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
+                target_dir="charts/interop-eks-microservice-chart"
+            elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
+                target_dir="charts/interop-eks-cronjob-chart"
+            else
+                target_dir="charts/$basename_file"
+            fi
+
+            echo "Extracting $filename to $target_dir"
+            mkdir -p "$target_dir"
+            tar -xzf "$filename" -C "$target_dir" --strip-components=1
+
+            echo "Contents of $target_dir:"
+            ls -la "$target_dir"
+        done
+
         cp charts_temp/Chart.yaml charts/
         cp charts_temp/Chart.lock charts/
-        
-        echo "-- Debugging extracted chart directories --"
-        ls -la "$ROOT_DIR/charts"
-        
-        if [[ -d "$ROOT_DIR/charts/interop-eks-microservice-chart" ]]; then
-            echo "Microservice chart contents:"
-            ls -la "$ROOT_DIR/charts/interop-eks-microservice-chart" | head -10
-        fi
-        
-        if [[ -d "$ROOT_DIR/charts/interop-eks-cronjob-chart" ]]; then
-            echo "Cronjob chart contents:"
-            ls -la "$ROOT_DIR/charts/interop-eks-cronjob-chart" | head -10
-        fi
+
+        echo "-- Final charts directory --"
+        ls -laR "$ROOT_DIR/charts"
     else
-        # Se non untar, sposta i .tgz nella directory charts
         mv charts_temp/*.tgz charts/ 2>/dev/null || true
         cp charts_temp/Chart.yaml charts/
         cp charts_temp/Chart.lock charts/
     fi
 
-    # Pulizia directory temporanea
     rm -rf charts_temp
 
     set +e
     if ! helm plugin list | grep -q "diff"; then
         helm plugin install https://github.com/databus23/helm-diff
-        diff_plugin_result=$?
-    else
-        diff_plugin_result=0
-    fi
-    if [[ $verbose == true ]]; then
-        echo "Helm-Diff plugin install result: $diff_plugin_result"
     fi
     set -e
 
