@@ -120,7 +120,7 @@ if [[ -z $microservice || $microservice == "" ]]; then
   help
 fi
 if [[ $skip_dep == false ]]; then
-  bash "$SCRIPTS_FOLDER"/helmDep.sh --untar --verbose
+  bash $SCRIPTS_FOLDER/helmDep.sh --untar --verbose
 fi
 
 VALID_CONFIG=$(isMicroserviceEnvConfigValid $microservice $environment)
