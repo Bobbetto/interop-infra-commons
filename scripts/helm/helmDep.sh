@@ -10,16 +10,17 @@ help() {
 }
 
 PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
+ROOT_DIR="$PROJECT_DIR"
 
-# Determina ROOT_DIR staticamente
-if [[ -f "$PROJECT_DIR/Chart.yaml" ]]; then
-    ROOT_DIR="$PROJECT_DIR"
-elif [[ -f "$PROJECT_DIR/chart/Chart.yaml" ]]; then
-    ROOT_DIR="$PROJECT_DIR/chart"
-else
-    echo "[ERROR] Chart.yaml not found in either $PROJECT_DIR or $PROJECT_DIR/chart"
-    exit 1
-fi
+# # Determina ROOT_DIR staticamente
+# if [[ -f "$PROJECT_DIR/Chart.yaml" ]]; then
+#     ROOT_DIR="$PROJECT_DIR"
+# elif [[ -f "$PROJECT_DIR/chart/Chart.yaml" ]]; then
+#     ROOT_DIR="$PROJECT_DIR/chart"
+# else
+#     echo "[ERROR] Chart.yaml not found in either $PROJECT_DIR or $PROJECT_DIR/chart"
+#     exit 1
+# fi
 
 echo "Using ROOT_DIR: $ROOT_DIR"
 echo "Using PROJECT_DIR: $PROJECT_DIR"
