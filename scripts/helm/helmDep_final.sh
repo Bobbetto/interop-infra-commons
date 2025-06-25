@@ -9,17 +9,18 @@ help() {
     exit 2
 }
 
-PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
+PROJECT_DIR=${PROJECT_DIR:-$(pwd)}
+ROOT_DIR=$PROJECT_DIR
 
-# Determina ROOT_DIR staticamente
-if [[ -f "$PROJECT_DIR/Chart.yaml" ]]; then
-    ROOT_DIR="$PROJECT_DIR"
-elif [[ -f "$PROJECT_DIR/chart/Chart.yaml" ]]; then
-    ROOT_DIR="$PROJECT_DIR/chart"
-else
-    echo "[ERROR] Chart.yaml not found in either $PROJECT_DIR or $PROJECT_DIR/chart"
-    exit 1
-fi
+# # Determina ROOT_DIR staticamente
+# if [[ -f "$PROJECT_DIR/Chart.yaml" ]]; then
+#     ROOT_DIR="$PROJECT_DIR"
+# elif [[ -f "$PROJECT_DIR/chart/Chart.yaml" ]]; then
+#     ROOT_DIR="$PROJECT_DIR/chart"
+# else
+#     echo "[ERROR] Chart.yaml not found in either $PROJECT_DIR or $PROJECT_DIR/chart"
+#     exit 1
+# fi
 
 echo "Using ROOT_DIR: $ROOT_DIR"
 echo "Using PROJECT_DIR: $PROJECT_DIR"
@@ -27,70 +28,84 @@ echo "Using PROJECT_DIR: $PROJECT_DIR"
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "Using SCRIPTS_FOLDER: $SCRIPTS_FOLDER"
 
-# === Arg parsing ===
+
 args=$#
 untar=false
+step=1
 verbose=false
 
-for (( i=0; i<$args; i++ ))
+for (( i=0; i<$args; i+=$step ))
 do
     case "$1" in
         -u| --untar )
             untar=true
-            shift
+          step=1
+          shift 1
             ;;
         -v| --verbose )
             verbose=true
-            shift
+          step=1
+          shift 1
             ;;
-        -h| --help )
+        -h | --help )
             help
             ;;
         *)
             echo "Unexpected option: $1"
             help
+
             ;;
     esac
 done
 
-setupHelmDeps() {
-    local untar=$1
+function setupHelmDeps() 
+{
+    untar=$1
 
     cd "$ROOT_DIR"
-
-    rm -rf charts_temp
+    
+    rm -rf charts
+    #rm -rf charts_temp
     mkdir -p charts_temp
+    echo "Copying Chart.yaml to charts_temp"
     cp Chart.yaml charts_temp/
+    
 
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
-    helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null || true
-    helm repo add interop-eks-cronjob-chart https://pagopa.github.io/interop-eks-cronjob-chart > /dev/null || true
+    helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null
+    helm repo add interop-eks-cronjob-chart https://pagopa.github.io/interop-eks-cronjob-chart > /dev/null
 
-    echo "-- Update PagoPA eks repos --"
+    echo "-- Update PagoPA eks repo --"
     helm repo update interop-eks-microservice-chart > /dev/null
     helm repo update interop-eks-cronjob-chart > /dev/null
 
     if [[ $verbose == true ]]; then
         echo "-- Search PagoPA charts in repo --"
-        helm search repo interop-eks-microservice-chart
-        helm search repo interop-eks-cronjob-chart
-    else
+    fi
         helm search repo interop-eks-microservice-chart > /dev/null
         helm search repo interop-eks-cronjob-chart > /dev/null
-    fi
-
-    echo "-- Build chart dependencies --"
-    cd charts_temp
 
     if [[ $verbose == true ]]; then
-        helm dep list | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
+        echo "-- List chart dependencies --"
+    fi
+    
+    cd "$ROOT_DIR/charts_temp"
+    helm dep list charts_temp | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
+    
+
+    if [[ $verbose == true ]]; then
+        echo "-- Build chart dependencies --"
+    fi
+    # only first time
+    #helm dep build 
+    dep_up_result=$(helm dep up)
+    if [[ $verbose == true ]]; then
+        echo $dep_up_result
     fi
 
-    helm dep up
-
     cd "$ROOT_DIR"
-    rm -rf charts
+    # rm -rf charts
     mkdir -p charts
 
     if [[ $untar == true ]]; then
@@ -131,15 +146,19 @@ setupHelmDeps() {
 
     rm -rf charts_temp
 
-    # Optional: install helm diff plugin if not present
     set +e
-    if ! helm plugin list | grep -q "diff"; then
+    # Install helm diff plugin
         helm plugin install https://github.com/databus23/helm-diff
+    diff_plugin_result=$?
+     if [[ $verbose == true ]]; then
+        echo "Helm-Diff plugin install result: $diff_plugin_result"
     fi
     set -e
 
+    cd -
     echo "-- Helm dependencies setup ended --"
     exit 0
 }
+
 
 setupHelmDeps $untar
