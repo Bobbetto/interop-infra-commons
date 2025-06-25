@@ -1,8 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-help()
-{
+help() {
     echo "Usage: 
         [ -u | --untar ] Untar downloaded charts
         [ -v | --verbose ] Show debug messages
@@ -12,7 +11,7 @@ help()
 
 PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
 
-# Determina ROOT_DIR in modo statico (senza git)
+# Determina ROOT_DIR staticamente
 if [[ -f "$PROJECT_DIR/Chart.yaml" ]]; then
     ROOT_DIR="$PROJECT_DIR"
 elif [[ -f "$PROJECT_DIR/chart/Chart.yaml" ]]; then
@@ -23,12 +22,11 @@ else
 fi
 
 echo "Using ROOT_DIR: $ROOT_DIR"
-echo "Using PROJECT_DIR: $PROJECT_DIR"  
-
+echo "Using PROJECT_DIR: $PROJECT_DIR"
 
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-
+# === Arg parsing ===
 args=$#
 untar=false
 verbose=false
@@ -37,40 +35,38 @@ for (( i=0; i<$args; i++ ))
 do
     case "$1" in
         -u| --untar )
-          untar=true
-          shift
-          ;;
+            untar=true
+            shift
+            ;;
         -v| --verbose )
-          verbose=true
-          shift
-          ;;
-        -h | --help )
-          help
-          ;;
+            verbose=true
+            shift
+            ;;
+        -h| --help )
+            help
+            ;;
         *)
-          echo "Unexpected option: $1"
-          help
-          ;;
+            echo "Unexpected option: $1"
+            help
+            ;;
     esac
 done
 
-setupHelmDeps() 
-{
+setupHelmDeps() {
     local untar=$1
 
     cd "$ROOT_DIR"
 
     rm -rf charts_temp
     mkdir -p charts_temp
-
     cp Chart.yaml charts_temp/
 
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
-    helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null
-    helm repo add interop-eks-cronjob-chart https://pagopa.github.io/interop-eks-cronjob-chart > /dev/null
+    helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null || true
+    helm repo add interop-eks-cronjob-chart https://pagopa.github.io/interop-eks-cronjob-chart > /dev/null || true
 
-    echo "-- Update PagoPA eks repo --"
+    echo "-- Update PagoPA eks repos --"
     helm repo update interop-eks-microservice-chart > /dev/null
     helm repo update interop-eks-cronjob-chart > /dev/null
 
@@ -134,6 +130,7 @@ setupHelmDeps()
 
     rm -rf charts_temp
 
+    # Optional: install helm diff plugin if not present
     set +e
     if ! helm plugin list | grep -q "diff"; then
         helm plugin install https://github.com/databus23/helm-diff
