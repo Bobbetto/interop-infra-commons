@@ -131,7 +131,7 @@ function setupHelmDeps() {
         echo "-- Final charts directory --"
         echo "ls -laR "$ROOT_DIR/charts""
     else
-        mv charts_temp/*.tgz charts/ 2>/dev/null || true
+        mv charts_temp/*.tgz charts/ 2>/dev/null
         cp charts_temp/Chart.yaml charts/
         cp charts_temp/Chart.lock charts/
     fi
