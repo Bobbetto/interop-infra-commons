@@ -99,12 +99,13 @@ function setupHelmDeps() {
     mkdir -p charts
     
     if [[ $untar == true ]]; then
-        cd charts
+        echo "Extracting .tgz files in charts/charts/"
+    
         for filename in charts/charts/*.tgz; do 
-            tar -xf "$filename" && rm -f "$filename";
-        done;
-
-        cd ..
+            [ -e "$filename" ] || continue
+            echo "Extracting $filename"
+            tar -xzf "$filename" -C charts --strip-components=1 && rm -f "$filename"
+        done
     fi
     # if [[ $untar == true ]]; then
     #     echo "Files in charts after helm dep up:"
