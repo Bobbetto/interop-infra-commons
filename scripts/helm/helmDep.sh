@@ -100,7 +100,7 @@ function setupHelmDeps() {
 
     if [[ $untar == true ]]; then
         echo "Files in charts_temp after helm dep up:"
-        echo "ls -la charts_temp/charts"
+        ls -la charts_temp/charts
 
         for filename in charts_temp/charts/*.tgz; do
             [ -e "$filename" ] || continue
@@ -120,14 +120,14 @@ function setupHelmDeps() {
             tar -xzf "$filename" -C "$target_dir" --strip-components=1
 
             echo "Contents of $target_dir:"
-            echo "ls -la "$target_dir""
+            ls -la "$target_dir"
         done
 
         cp charts_temp/Chart.yaml charts/
         cp charts_temp/Chart.lock charts/
 
         echo "-- Final charts directory --"
-        echo "ls -laR "$ROOT_DIR/charts""
+        ls -laR "$ROOT_DIR/charts"
     else
         mv charts_temp/*.tgz charts/ 2>/dev/null || true
         cp charts_temp/Chart.yaml charts/
