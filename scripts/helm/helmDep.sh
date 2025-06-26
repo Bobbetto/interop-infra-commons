@@ -99,38 +99,29 @@ function setupHelmDeps() {
     mkdir -p charts
     
     if [[ $untar == true ]]; then
-        echo "Extracting .tgz files in charts/charts/"
-    
-        for filename in charts/charts/*.tgz; do 
-            [ -e "$filename" ] || continue
-            echo "Extracting $filename"
-            tar -xzf "$filename" -C charts --strip-components=1 && rm -f "$filename"
-        done
-    fi
-    # if [[ $untar == true ]]; then
-    #     echo "Files in charts after helm dep up:"
+        echo "Files in charts in charts/charts:"
         
 
-    #     for filename in charts/charts/*.tgz; do
-    #         [ -e "$filename" ] || continue
-    #         echo "Processing file: $filename"
-    #         basename_file=$(basename "$filename" .tgz)
+        for filename in charts/charts/*.tgz; do
+            [ -e "$filename" ] || continue
+            echo "Processing file: $filename"
+            basename_file=$(basename "$filename" .tgz)
 
-    #         if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
-    #             target_dir="charts/interop-eks-microservice-chart"
-    #         elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
-    #             target_dir="charts/interop-eks-cronjob-chart"
-    #         else
-    #             target_dir="charts/$basename_file"
-    #         fi
+            if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
+                target_dir="charts/interop-eks-microservice-chart"
+            elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
+                target_dir="charts/interop-eks-cronjob-chart"
+            else
+                target_dir="charts/$basename_file"
+            fi
 
-    #         echo "Extracting $filename to $target_dir"
-    #         mkdir -p "$target_dir"
-    #         tar -xzf "$filename" -C "$target_dir" --strip-components=1
+            echo "Extracting $filename to $target_dir"
+            mkdir -p "$target_dir"
+            tar -xzf "$filename" -C "$target_dir" --strip-components=1
 
-    #     done
+        done
 
-    # fi
+    fi
 
     set +e
     if ! helm plugin list | grep -q 'diff'; then
