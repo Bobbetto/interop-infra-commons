@@ -101,25 +101,36 @@ function setupHelmDeps() {
     if [[ $untar == true ]]; then
         echo "Files in charts in charts/charts:"
         
-
-        for filename in charts/charts/*.tgz; do
+        for filename in charts/charts/*.tgz; do 
             [ -e "$filename" ] || continue
-            echo "Processing file: $filename"
+            echo "Processing $filename"
+        
             basename_file=$(basename "$filename" .tgz)
-
-            if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
-                target_dir="charts/interop-eks-microservice-chart"
-            elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
-                target_dir="charts/interop-eks-cronjob-chart"
-            else
-                target_dir="charts/$basename_file"
-            fi
-
-            echo "Extracting $filename to $target_dir"
+            chart_name="${basename_file%-*}"         # rimuove la versione
+            target_dir="charts/$chart_name"
+        
+            echo "→ Extracting to $target_dir"
             mkdir -p "$target_dir"
             tar -xzf "$filename" -C "$target_dir" --strip-components=1
+        done    
+        # for filename in charts/charts/*.tgz; do
+        #     [ -e "$filename" ] || continue
+        #     echo "Processing file: $filename"
+        #     basename_file=$(basename "$filename" .tgz)
 
-        done
+        #     if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
+        #         target_dir="charts/interop-eks-microservice-chart"
+        #     elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
+        #         target_dir="charts/interop-eks-cronjob-chart"
+        #     else
+        #         target_dir="charts/$basename_file"
+        #     fi
+
+        #     echo "Extracting $filename to $target_dir"
+        #     mkdir -p "$target_dir"
+        #     tar -xzf "$filename" -C "$target_dir" --strip-components=1
+
+        # done
 
     fi
 
