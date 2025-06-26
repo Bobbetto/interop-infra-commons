@@ -124,11 +124,17 @@ function setupHelmDeps() {
     fi
 
     set +e
-    # Install helm diff plugin
+    if ! helm plugin list | grep -q 'diff'; then
+        if [[ $verbose == true ]]; then
+            echo "Installing helm-diff plugin..."
+        fi
         helm plugin install https://github.com/databus23/helm-diff
-    diff_plugin_result=$?
-     if [[ $verbose == true ]]; then
-        echo "Helm-Diff plugin install result: $diff_plugin_result"
+        diff_plugin_result=$?
+    else
+        if [[ $verbose == true ]]; then
+            echo "Helm-diff plugin already installed"
+        fi
+        diff_plugin_result=0
     fi
     set -e
 
