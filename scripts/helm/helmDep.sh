@@ -104,7 +104,6 @@ function setupHelmDeps() {
             echo "Processing $filename"
 
             basename_file=$(basename "$filename" .tgz)
-            #chart_name="${basename_file}"
             chart_name="${basename_file%-*}"
             target_dir="charts/$chart_name"
 
