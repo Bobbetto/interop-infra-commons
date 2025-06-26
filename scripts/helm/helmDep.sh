@@ -96,8 +96,8 @@ function setupHelmDeps() {
         echo $dep_up_result
     fi
 
-    #cd "$ROOT_DIR"
-    #mkdir -p charts
+    cd "$ROOT_DIR"
+    mkdir -p charts
 
     if [[ $untar == true ]]; then
         echo "Files in charts after helm dep up:"
