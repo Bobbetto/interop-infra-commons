@@ -53,9 +53,8 @@ function setupHelmDeps() {
 
     cd "$ROOT_DIR"
 
-    #rm -rf charts_temp
     if [[ $verbose == true ]]; then
-        echo "Creating temporary directory for charts"
+        echo "Creating directory for charts"
     fi
     mkdir -p charts
 
@@ -120,18 +119,9 @@ function setupHelmDeps() {
             mkdir -p "$target_dir"
             tar -xzf "$filename" -C "$target_dir" --strip-components=1
 
-            echo "Contents of $target_dir:"
-            echo "ls -la "$target_dir""
         done
 
-        #cp charts_temp/Chart.yaml charts/
-        #cp charts_temp/Chart.lock charts/
-
-        echo "-- Final charts directory --"
-        echo "ls -laR "$ROOT_DIR/charts""
     fi
-
-    #rm -rf charts_temp
 
     set +e
     # Install helm diff plugin
