@@ -53,7 +53,7 @@ function setupHelmDeps() {
 
     cd "$ROOT_DIR"
 
-    rm -rf charts_temp
+    #rm -rf charts_temp
     if [[ $verbose == true ]]; then
         echo "Creating temporary directory for charts"
     fi
