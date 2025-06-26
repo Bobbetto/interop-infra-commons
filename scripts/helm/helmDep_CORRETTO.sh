@@ -57,12 +57,12 @@ function setupHelmDeps() {
     if [[ $verbose == true ]]; then
         echo "Creating temporary directory for charts"
     fi
-    mkdir -p charts
+    mkdir -p charts_temp
 
     if [[ $verbose == true ]]; then
-        echo "Copying Chart.yaml to charts"
+        echo "Copying Chart.yaml to charts_temp"
     fi
-    cp Chart.yaml charts/
+    cp Chart.yaml charts_temp/
     
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
@@ -82,9 +82,9 @@ function setupHelmDeps() {
     if [[ $verbose == true ]]; then
         echo "-- List chart dependencies --"
     fi
-    helm dep list charts | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
+    helm dep list charts_temp | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
 
-    cd charts
+    cd charts_temp
 
     if [[ $verbose == true ]]; then
         echo "-- Build chart dependencies --"
@@ -96,14 +96,14 @@ function setupHelmDeps() {
         echo $dep_up_result
     fi
 
-    #cd "$ROOT_DIR"
-    #mkdir -p charts
+    cd "$ROOT_DIR"
+    mkdir -p charts
 
     if [[ $untar == true ]]; then
-        echo "Files in charts after helm dep up:"
-        
+        echo "Files in charts_temp after helm dep up:"
+        echo "ls -la charts_temp/charts"
 
-        for filename in charts/charts/*.tgz; do
+        for filename in charts_temp/charts/*.tgz; do
             [ -e "$filename" ] || continue
             echo "Processing file: $filename"
             basename_file=$(basename "$filename" .tgz)
@@ -124,14 +124,18 @@ function setupHelmDeps() {
             echo "ls -la "$target_dir""
         done
 
-        #cp charts_temp/Chart.yaml charts/
-        #cp charts_temp/Chart.lock charts/
+        cp charts_temp/Chart.yaml charts/
+        cp charts_temp/Chart.lock charts/
 
         echo "-- Final charts directory --"
         echo "ls -laR "$ROOT_DIR/charts""
+    else
+        mv charts_temp/*.tgz charts/ 2>/dev/null
+        cp charts_temp/Chart.yaml charts/
+        cp charts_temp/Chart.lock charts/
     fi
 
-    #rm -rf charts_temp
+    rm -rf charts_temp
 
     set +e
     # Install helm diff plugin
