@@ -64,7 +64,7 @@ function setupHelmDeps() {
     fi
     cp Chart.yaml charts_temp/
     
-    cd charts_temp
+    #cd charts_temp
 
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
