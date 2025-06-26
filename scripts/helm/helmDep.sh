@@ -97,31 +97,39 @@ function setupHelmDeps() {
 
     cd "$ROOT_DIR"
     mkdir -p charts
-
+    
     if [[ $untar == true ]]; then
-        echo "Files in charts after helm dep up:"
+        cd charts
+        for filename in charts/charts/*.tgz; do 
+            tar -xf "$filename" && rm -f "$filename";
+        done;
+
+        cd ..
+    fi
+    # if [[ $untar == true ]]; then
+    #     echo "Files in charts after helm dep up:"
         
 
-        for filename in charts/charts/*.tgz; do
-            [ -e "$filename" ] || continue
-            echo "Processing file: $filename"
-            basename_file=$(basename "$filename" .tgz)
+    #     for filename in charts/charts/*.tgz; do
+    #         [ -e "$filename" ] || continue
+    #         echo "Processing file: $filename"
+    #         basename_file=$(basename "$filename" .tgz)
 
-            if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
-                target_dir="charts/interop-eks-microservice-chart"
-            elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
-                target_dir="charts/interop-eks-cronjob-chart"
-            else
-                target_dir="charts/$basename_file"
-            fi
+    #         if [[ "$basename_file" == interop-eks-microservice-chart-* ]]; then
+    #             target_dir="charts/interop-eks-microservice-chart"
+    #         elif [[ "$basename_file" == interop-eks-cronjob-chart-* ]]; then
+    #             target_dir="charts/interop-eks-cronjob-chart"
+    #         else
+    #             target_dir="charts/$basename_file"
+    #         fi
 
-            echo "Extracting $filename to $target_dir"
-            mkdir -p "$target_dir"
-            tar -xzf "$filename" -C "$target_dir" --strip-components=1
+    #         echo "Extracting $filename to $target_dir"
+    #         mkdir -p "$target_dir"
+    #         tar -xzf "$filename" -C "$target_dir" --strip-components=1
 
-        done
+    #     done
 
-    fi
+    # fi
 
     set +e
     if ! helm plugin list | grep -q 'diff'; then
