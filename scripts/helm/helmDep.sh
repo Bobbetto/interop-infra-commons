@@ -65,7 +65,7 @@ function setupHelmDeps() {
     cp Chart.yaml charts_temp/
     
     cd charts_temp
-    
+
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
     helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null
@@ -87,7 +87,7 @@ function setupHelmDeps() {
     fi
     helm dep list charts_temp | awk '{printf "%-35s %-15s %-20s\n", $1, $2, $3}'
 
-    # cd charts_temp
+    cd charts_temp
 
     if [[ $verbose == true ]]; then
         echo "-- Build chart dependencies --"
