@@ -113,13 +113,17 @@ function setupHelmDeps() {
         done
     else
         if find charts/charts -maxdepth 1 -name '*.tgz' | grep -q .; then
-            echo "Moving charts to root charts directory"
+            if [[ $verbose == true ]]; then
+                echo "Moving charts to root charts directory"
+            fi
             mv charts/charts/*.tgz charts/
         fi
     fi
 
     if [[ -d charts/charts && -z "$(ls -A charts/charts)" ]]; then
-        echo "Removing empty charts directory"
+        if [[ $verbose == true ]]; then
+            echo "Removing empty charts directory"
+        fi
         rmdir charts/charts
     fi
 
