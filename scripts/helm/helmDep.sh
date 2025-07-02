@@ -96,7 +96,7 @@ function setupHelmDeps() {
     fi
 
     cd "$ROOT_DIR"
-    mkdir -p charts
+   # mkdir -p charts
 
     if [[ $untar == true ]]; then
         for filename in charts/charts/*.tgz; do
