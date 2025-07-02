@@ -2,10 +2,10 @@
 set -euo pipefail
 
 help() {
-    echo "Usage: 
+    echo "Usage:
         [ -u | --untar ] Untar downloaded charts
         [ -v | --verbose ] Show debug messages
-        [ -h | --help ] This help" 
+        [ -h | --help ] This help"
     exit 2
 }
 
@@ -62,7 +62,7 @@ function setupHelmDeps() {
         echo "Copying Chart.yaml to charts"
     fi
     cp Chart.yaml charts/
-    
+
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
     helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null
@@ -97,9 +97,9 @@ function setupHelmDeps() {
 
     cd "$ROOT_DIR"
     mkdir -p charts
-    
-    if [[ $untar == true ]]; then   
-        for filename in charts/charts/*.tgz; do 
+
+    if [[ $untar == true ]]; then
+        for filename in charts/charts/*.tgz; do
             [ -e "$filename" ] || continue
             echo "Processing $filename"
             basename_file=$(basename "$filename" .tgz)
@@ -110,13 +110,24 @@ function setupHelmDeps() {
             mkdir -p "$target_dir"
             tar -xzf "$filename" -C "$target_dir" --strip-components=1
             rm -f "$filename"
-        done    
+        done
+    else
+        if find charts/charts -maxdepth 1 -name '*.tgz' | grep -q .; then
+            echo "Moving charts to root charts directory"
+            mv charts/charts/*.tgz charts/
+        fi
+    fi
+
+    if [[ -d charts/charts && -z "$(ls -A charts/charts)" ]]; then
+        echo "Removing empty charts directory"
+        rmdir charts/charts
     fi
 
     set +e
+    # Install helm diff plugin
     if ! helm plugin list | grep -q 'diff'; then
         if [[ $verbose == true ]]; then
-            echo "Installing helm-diff plugin..."
+            echo "Installing helm-diff plugin"
         fi
         helm plugin install https://github.com/databus23/helm-diff
         diff_plugin_result=$?
