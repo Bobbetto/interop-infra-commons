@@ -20,7 +20,7 @@ args=$#
 untar=false
 step=1
 verbose=false
-
+# Check args
 for (( i=0; i<$args; i+=$step ))
 do
     case "$1" in
@@ -48,7 +48,7 @@ done
 function setupHelmDeps()
 {
     untar=$1
-
+    # Create charts directory and copy Chart.yaml into it
     cd "$ROOT_DIR"
 
     if [[ $verbose == true ]]; then
@@ -60,7 +60,7 @@ function setupHelmDeps()
         echo "Copying Chart.yaml to charts"
     fi
     cp Chart.yaml charts/
-
+    # Execute helm commands
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
     helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null
@@ -95,7 +95,7 @@ function setupHelmDeps()
     cd "$ROOT_DIR"
 
     if [[ $untar == true ]]; then
-    # Untar downloaded charts and move them to the root charts directory
+    # Untar downloaded charts to the root charts directory
         for filename in charts/charts/*.tgz; do
             [ -e "$filename" ] || continue
             echo "Processing $filename"
@@ -117,12 +117,16 @@ function setupHelmDeps()
             mv charts/charts/*.tgz charts/
         fi
     fi
-    # Remove empty charts directory if it exists and if it is empty
+    # Remove empty temp charts directory if it exists and if it is empty
     if [[ -d charts/charts && -z "$(ls -A charts/charts)" ]]; then
         if [[ $verbose == true ]]; then
-            echo "Removing empty charts directory"
+            echo "Removing empty temp charts directory"
         fi
         rmdir charts/charts
+    else
+        if [[ $verbose == true ]]; then
+            echo "charts temp directory is not empty, not removing it"
+        fi
     fi
 
     set +e
