@@ -245,7 +245,6 @@ jobs:
                   FAILED_CRONJOBS="${FAILED_CRONJOBS}${CRONJOB_NAME}(lint) "
                   VALIDATION_ERROR_FLAG=1
                 fi
-                echo "Linting failed for cronjob: $CRONJOB_NAME"
               else
                 echo "Cronjob $CRONJOB_NAME passed all checks"
               fi
