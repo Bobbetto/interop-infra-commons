@@ -10,10 +10,6 @@ on:
       infra_commons_tag:
         required: false
         type: string
-      strict_kube_linter_checks:
-        description: 'Enable strict kube-linter checks'
-        required: false
-        type: boolean
 
 defaults:
   run:
@@ -57,6 +53,7 @@ jobs:
         run: |
           set -euo pipefail
 
+
           OPTIONS=""
 
           if [[ $CHART_TYPE == "microservice" ]]; then
@@ -98,7 +95,7 @@ jobs:
           tar -xzf kube-linter-linux.tar.gz
           chmod +x kube-linter
           sudo mv kube-linter /usr/local/bin/kube-linter
-          # rm kube-linter-linux.tar.gz
+          ls kube-linter-linux.tar.gz
           kube-linter version
 
       - name: Get Microservices List
@@ -119,7 +116,6 @@ jobs:
           FAILED_MICROSERVICES=""
           VALIDATION_ERROR_FLAG=0
 
-
           if [[ -n "$MICROSERVICES" ]]; then
             set +e
             for MICROSERVICE_NAME in $MICROSERVICES; do
@@ -132,7 +128,7 @@ jobs:
                 --environment ${{ inputs.environment }} \
                 --microservice $MICROSERVICE_NAME \
                 -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml \
-                --output console > $TEMPLATE_OUTPUT_PATH
+                --output console | tee $TEMPLATE_OUTPUT_PATH
 
               if [[ $? -ne 0 ]]; then
                 echo "Template generation failed for microservice: $MICROSERVICE_NAME"
@@ -143,14 +139,11 @@ jobs:
 
               echo "Linting microservice: $MICROSERVICE_NAME"
               kube-linter lint $TEMPLATE_OUTPUT_PATH
-              LINTER_EXIT_CODE=$?
 
-              if [[ $LINTER_EXIT_CODE -ne 0 ]]; then
+              if [[ $? -ne 0 ]]; then
                 echo "Linting failed for microservice: $MICROSERVICE_NAME"
-                if [[ "${{ inputs.strict_kube_linter_checks }}" == "true" ]]; then
-                  FAILED_MICROSERVICES="${FAILED_MICROSERVICES}${MICROSERVICE_NAME}(lint) "
-                  VALIDATION_ERROR_FLAG=1
-                fi
+                FAILED_MICROSERVICES="${FAILED_MICROSERVICES}${MICROSERVICE_NAME}(lint) "
+                VALIDATION_ERROR_FLAG=1
               else
                 echo "Microservice $MICROSERVICE_NAME passed all checks"
               fi
@@ -193,7 +186,7 @@ jobs:
           tar -xzf kube-linter-linux.tar.gz
           chmod +x kube-linter
           sudo mv kube-linter /usr/local/bin/kube-linter
-          # rm kube-linter-linux.tar.gz
+          ls kube-linter-linux.tar.gz
           kube-linter version
 
       - name: Get Cronjobs List
@@ -237,15 +230,11 @@ jobs:
 
               echo "Linting cronjob: $CRONJOB_NAME"
               kube-linter lint $TEMPLATE_OUTPUT_PATH
-              LINTER_EXIT_CODE=$?
 
-              if [[ $LINTER_EXIT_CODE -ne 0 ]]; then
+              if [[ $? -ne 0 ]]; then
                 echo "Linting failed for cronjob: $CRONJOB_NAME"
-                if [[ "${{ inputs.strict_kube_linter_checks }}" == "true" ]]; then
-                  FAILED_CRONJOBS="${FAILED_CRONJOBS}${CRONJOB_NAME}(lint) "
-                  VALIDATION_ERROR_FLAG=1
-                fi
-                echo "Linting failed for cronjob: $CRONJOB_NAME"
+                FAILED_CRONJOBS="${FAILED_CRONJOBS}${CRONJOB_NAME}(lint) "
+                VALIDATION_ERROR_FLAG=1
               else
                 echo "Cronjob $CRONJOB_NAME passed all checks"
               fi
