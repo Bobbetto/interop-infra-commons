@@ -108,11 +108,12 @@ function setupHelmDeps()
             tar -xzf "$filename" -C "$target_dir" --strip-components=1
             rm -f "$filename"
         done
-    fi
+
     if [[ $verbose == true ]]; then
         echo "Removing charts/charts directory"
     fi
     rm -rf charts/charts
+    fi
 
     set +e
     # Install helm diff plugin, first check if it is already installed
