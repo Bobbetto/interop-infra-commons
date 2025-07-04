@@ -108,10 +108,17 @@ function setupHelmDeps()
             tar -xzf "$filename" -C "$target_dir" --strip-components=1
             rm -f "$filename"
         done
+    fi
+    # Remove empty temp charts directory if it exists and if it is empty
+    if [[ -d charts/charts && -z "$(ls -A charts/charts)" ]]; then
         if [[ $verbose == true ]]; then
-            echo "Removing charts/charts directory"
+            echo "Removing empty temp charts directory"
         fi
-        rm -rf charts/charts
+        rmdir charts/charts
+    else
+        if [[ $verbose == true ]]; then
+            echo "charts temp directory is not empty, not removing it"
+        fi
     fi
 
     set +e
