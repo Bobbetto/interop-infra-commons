@@ -142,7 +142,7 @@ function setupHelmDeps()
     set -e
 
     echo "-- Helm dependencies setup ended --"
-    exit 0
+    return 0
 }
 
 setupHelmDeps $untar "$verbose"
