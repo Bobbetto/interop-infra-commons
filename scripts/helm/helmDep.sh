@@ -108,26 +108,10 @@ function setupHelmDeps()
             tar -xzf "$filename" -C "$target_dir" --strip-components=1
             rm -f "$filename"
         done
-    else
-    #  Move downloaded charts not extracted to the root charts directory
-        if find charts/charts -maxdepth 1 -name '*.tgz' | grep -q .; then
-            if [[ $verbose == true ]]; then
-                echo "Moving charts to root charts directory"
-            fi
-            mv charts/charts/*.tgz charts/
-        fi
+    if [[ $verbose == true ]]; then
+        echo "Removing charts/charts directory"
     fi
-    # Remove empty temp charts directory if it exists and if it is empty
-    if [[ -d charts/charts && -z "$(ls -A charts/charts)" ]]; then
-        if [[ $verbose == true ]]; then
-            echo "Removing empty temp charts directory"
-        fi
-        rmdir charts/charts
-    else
-        if [[ $verbose == true ]]; then
-            echo "charts temp directory is not empty, not removing it"
-        fi
-    fi
+    rm -rf charts/charts
 
     set +e
     # Install helm diff plugin, first check if it is already installed
