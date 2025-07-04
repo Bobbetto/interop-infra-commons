@@ -50,6 +50,7 @@ done
 function setupHelmDeps()
 {
     untar=$1
+    verbose=$2
     # Create charts directory and copy Chart.yaml into it
     cd "$ROOT_DIR"
 
