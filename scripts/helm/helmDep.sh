@@ -108,6 +108,7 @@ function setupHelmDeps()
             tar -xzf "$filename" -C "$target_dir" --strip-components=1
             rm -f "$filename"
         done
+    fi
     if [[ $verbose == true ]]; then
         echo "Removing charts/charts directory"
     fi
