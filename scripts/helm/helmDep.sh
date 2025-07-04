@@ -145,4 +145,4 @@ function setupHelmDeps()
     exit 0
 }
 
-setupHelmDeps $untar
+setupHelmDeps $untar "$verbose"
