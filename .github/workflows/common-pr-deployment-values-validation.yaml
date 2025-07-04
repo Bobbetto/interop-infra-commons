@@ -12,7 +12,7 @@ on:
         type: string
       strict_kube_linter_checks:
         description: 'Enable strict kube-linter checks'
-        required: false
+        required: true
         type: boolean
 
 defaults:
