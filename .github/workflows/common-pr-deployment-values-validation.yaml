@@ -163,7 +163,7 @@ jobs:
             echo "No microservices found for environment ${{ inputs.environment }}"
           fi
 
-          if [[ $LINTER_EXIT_CODE && $VALIDATION_ERROR_FLAG -eq 1 ]]; then
+          if [[ $LINTER_EXIT_CODE -ne 0 && $VALIDATION_ERROR_FLAG -eq 1 ]]; then
             echo "Some microservices failed validation. Failed items: $FAILED_MICROSERVICES"
             exit 1
           else
