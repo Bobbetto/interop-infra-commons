@@ -14,9 +14,6 @@ ROOT_DIR="$PROJECT_DIR"
 
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Using ROOT_DIR: $ROOT_DIR"
-echo "Using PROJECT_DIR: $PROJECT_DIR"
-echo "Using SCRIPTS_FOLDER: $SCRIPTS_FOLDER"
 
 args=$#
 untar=false
@@ -50,7 +47,6 @@ done
 function setupHelmDeps()
 {
     untar=$1
-    verbose=$2
     # Create charts directory and copy Chart.yaml into it
     cd "$ROOT_DIR"
 
@@ -110,14 +106,6 @@ function setupHelmDeps()
             tar -xzf "$filename" -C "$target_dir" --strip-components=1
             rm -f "$filename"
         done
-    # else
-    # #  Move downloaded charts not extracted to the root charts directory
-    #     if find charts/charts -maxdepth 1 -name '*.tgz' | grep -q .; then
-    #         if [[ $verbose == true ]]; then
-    #             echo "Moving charts to root charts directory"
-    #         fi
-    #         mv charts/charts/*.tgz charts/
-    #     fi
     fi
     # Remove temp charts directory
     if [[ $verbose == true ]]; then
@@ -142,7 +130,7 @@ function setupHelmDeps()
     set -e
 
     echo "-- Helm dependencies setup ended --"
-    return 0
+    exit 0
 }
 
 setupHelmDeps $untar "$verbose"
