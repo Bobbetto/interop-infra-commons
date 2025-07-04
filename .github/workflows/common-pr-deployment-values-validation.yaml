@@ -14,7 +14,6 @@ on:
         description: 'Enable strict kube-linter checks'
         required: false
         type: boolean
-        default: false
 
 defaults:
   run:
@@ -159,7 +158,7 @@ jobs:
             echo "No microservices found for environment ${{ inputs.environment }}"
           fi
 
-          if [[ $VALIDATION_ERROR_FLAG -eq 1 ]]; then
+          if [[ -n "$FAILED_CRONJOBS" ]]; then
             echo "Some microservices failed validation. Failed items: $FAILED_MICROSERVICES"
             exit 1
           else
