@@ -242,8 +242,8 @@ jobs:
 
               if [[ $LINTER_EXIT_CODE -ne 0 ]]; then
                 echo "Linting failed for cronjob: $CRONJOB_NAME"
+                FAILED_CRONJOBS="${FAILED_CRONJOBS}${CRONJOB_NAME}(lint) "
                 if [[ "${{ inputs.strict_kube_linter_checks }}" == "true" ]]; then
-                  FAILED_CRONJOBS="${FAILED_CRONJOBS}${CRONJOB_NAME}(lint) "
                   VALIDATION_ERROR_FLAG=1
                 fi
               else
@@ -257,7 +257,7 @@ jobs:
             echo "No cronjobs found for environment ${{ inputs.environment }}"
           fi
 
-          if [[ $VALIDATION_ERROR_FLAG -eq 1 ]]; then
+          if [[ $LINTER_EXIT_CODE -ne 0 && $VALIDATION_ERROR_FLAG -eq 1 ]]; then
             echo "Some cronjobs failed validation. Failed items: $FAILED_CRONJOBS"
             exit 1
           else
