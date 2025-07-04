@@ -12,49 +12,47 @@ help() {
 PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
 ROOT_DIR="$PROJECT_DIR"
 
-echo "Using ROOT_DIR: $ROOT_DIR"
-echo "Using PROJECT_DIR: $PROJECT_DIR"
-
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-echo "Using SCRIPTS_FOLDER: $SCRIPTS_FOLDER"
+
 
 
 args=$#
 untar=false
 step=1
 verbose=false
-
+# Check args
 for (( i=0; i<$args; i+=$step ))
 do
     case "$1" in
         -u| --untar )
-            untar=true
+          untar=true
           step=1
           shift 1
-            ;;
+          ;;
         -v| --verbose )
-            verbose=true
+          verbose=true
           step=1
           shift 1
-            ;;
+          ;;
         -h | --help )
-            help
-            ;;
+          help
+          ;;
         *)
-            echo "Unexpected option: $1"
-            help
+          echo "Unexpected option: $1"
+          help
 
-            ;;
+          ;;
     esac
 done
 
-function setupHelmDeps() {
-    local untar=$1
-
+function setupHelmDeps()
+{
+    untar=$1
+    # Create charts directory and copy Chart.yaml into it
     cd "$ROOT_DIR"
 
     if [[ $verbose == true ]]; then
-        echo "Creating directory for charts"
+        echo "Creating directory charts"
     fi
     mkdir -p charts
 
@@ -62,7 +60,7 @@ function setupHelmDeps() {
         echo "Copying Chart.yaml to charts"
     fi
     cp Chart.yaml charts/
-
+    # Execute helm commands
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"
     helm repo add interop-eks-microservice-chart https://pagopa.github.io/interop-eks-microservice-chart > /dev/null
@@ -75,8 +73,8 @@ function setupHelmDeps() {
     if [[ $verbose == true ]]; then
         echo "-- Search PagoPA charts in repo --"
     fi
-        helm search repo interop-eks-microservice-chart > /dev/null
-        helm search repo interop-eks-cronjob-chart > /dev/null
+    helm search repo interop-eks-microservice-chart > /dev/null
+    helm search repo interop-eks-cronjob-chart > /dev/null
 
     if [[ $verbose == true ]]; then
         echo "-- List chart dependencies --"
@@ -88,8 +86,7 @@ function setupHelmDeps() {
     if [[ $verbose == true ]]; then
         echo "-- Build chart dependencies --"
     fi
-    # only first time
-    #helm dep up
+    # Execute helm dependency update command
     dep_up_result=$(helm dep up)
     if [[ $verbose == true ]]; then
         echo $dep_up_result
@@ -98,6 +95,7 @@ function setupHelmDeps() {
     cd "$ROOT_DIR"
 
     if [[ $untar == true ]]; then
+    # Untar downloaded charts to the root charts directory
         for filename in charts/charts/*.tgz; do
             [ -e "$filename" ] || continue
             echo "Processing $filename"
@@ -111,6 +109,7 @@ function setupHelmDeps() {
             rm -f "$filename"
         done
     else
+    #  Move downloaded charts not extracted to the root charts directory
         if find charts/charts -maxdepth 1 -name '*.tgz' | grep -q .; then
             if [[ $verbose == true ]]; then
                 echo "Moving charts to root charts directory"
@@ -118,17 +117,15 @@ function setupHelmDeps() {
             mv charts/charts/*.tgz charts/
         fi
     fi
-
-    if [[ -d charts/charts && -z "$(ls -A charts/charts)" ]]; then
-        if [[ $verbose == true ]]; then
-            echo "Removing empty charts directory"
-        fi
-        rmdir charts/charts
+    # Remove temp charts directory
+    if [[ $verbose == true ]]; then
+        echo "Removing charts/charts directory"
     fi
+    rm -rf charts/charts
 
     set +e
-    # Install helm diff plugin
-    if ! helm plugin list | grep -q 'diff'; then
+    # Install helm diff plugin, first check if it is already installed
+    if [[ $(helm plugin list | grep -c 'diff') -eq 0 ]]; then
         if [[ $verbose == true ]]; then
             echo "Installing helm-diff plugin"
         fi
@@ -142,10 +139,8 @@ function setupHelmDeps() {
     fi
     set -e
 
-    cd "$ROOT_DIR/charts"
     echo "-- Helm dependencies setup ended --"
     exit 0
 }
-
 
 setupHelmDeps $untar
