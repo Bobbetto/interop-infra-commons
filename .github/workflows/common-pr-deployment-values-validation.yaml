@@ -257,7 +257,7 @@ jobs:
             echo "No cronjobs found for environment ${{ inputs.environment }}"
           fi
 
-          if [[ $LINTER_EXIT_CODE -ne 0 && $VALIDATION_ERROR_FLAG -eq 1 ]]; then
+          if [[ $LINTER_EXIT_CODE -ne 0]]; then
             echo "Some cronjobs failed validation. Failed items: $FAILED_CRONJOBS"
             exit 1
           else
