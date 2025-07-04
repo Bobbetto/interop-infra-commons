@@ -82,7 +82,7 @@ jobs:
       - name: Checkout scripts repository
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
         with:
-          repository: pagopa/interop-infra-commons
+          repository: Bobbetto/interop-infra-commons
           path: interop-infra-commons
           fetch-depth: 0
           sparse-checkout: 'scripts/helm'
@@ -173,12 +173,12 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+        uses: actions/checkout@v4
 
       - name: Checkout scripts repository
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+        uses: actions/checkout@v4
         with:
-          repository: pagopa/interop-infra-commons
+          repository: Bobbetto/interop-infra-commons
           path: interop-infra-commons
           fetch-depth: 0
           sparse-checkout: 'scripts/helm'
