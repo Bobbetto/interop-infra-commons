@@ -214,6 +214,7 @@ jobs:
           export PROJECT_DIR=$(pwd)
           FAILED_CRONJOBS=""
           VALIDATION_ERROR_FLAG=0
+          LINTER_EXIT_CODE=0
 
           if [[ -n "$CRONJOBS" ]]; then
             set +e
