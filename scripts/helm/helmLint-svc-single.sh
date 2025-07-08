@@ -147,16 +147,18 @@ if [[ $enable_debug == true ]]; then
     LINT_CMD=$LINT_CMD"--debug "
 fi
 
+OUTPUT_TO="> \"$OUT_DIR/$microservice.out.yaml\""
+if [[ $output_redirect == "console" ]]; then
+  OUTPUT_TO=""
+fi
+
 LINT_CMD+=" \"$chart_location\""
 LINT_CMD+=" -f \"$ROOT_DIR/commons/$ENV/values-microservice.compiled.yaml\""
 LINT_CMD+=" -f \"$ROOT_DIR/microservices/$microservice/$ENV/values.yaml\""
 LINT_CMD+=" --set enableLookup=false"
 LINT_CMD+=" $OUTPUT_TO"
 
-OUTPUT_TO="> \"$OUT_DIR/$microservice.out.yaml\""
-if [[ $output_redirect == "console" ]]; then
-  OUTPUT_TO=""
-fi
+
 
 eval $LINT_CMD
 

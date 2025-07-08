@@ -144,15 +144,16 @@ if [[ $enable_debug == true ]]; then
   LINT_CMD+=" --debug"
 fi
 
-LINT_CMD+=" \"$chart_location\""
-LINT_CMD+=" -f \"$ROOT_DIR/commons/$ENV/values-cronjob.compiled.yaml\""
-LINT_CMD+=" -f \"$ROOT_DIR/jobs/$job/$ENV/values.yaml\""
-LINT_CMD+=" --set enableLookup=false"
-
 OUTPUT_TO="> \"$OUT_DIR/$job.out.yaml\""
 if [[ $output_redirect == "console" ]]; then
   OUTPUT_TO=""
 fi
+
+LINT_CMD+=" \"$chart_location\""
+LINT_CMD+=" -f \"$ROOT_DIR/commons/$ENV/values-cronjob.compiled.yaml\""
+LINT_CMD+=" -f \"$ROOT_DIR/jobs/$job/$ENV/values.yaml\""
+LINT_CMD+=" --set enableLookup=false"
+LINT_CMD+=" $OUTPUT_TO"
 
 eval $LINT_CMD
 
