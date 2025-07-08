@@ -14,27 +14,7 @@ PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
 ROOT_DIR="$PROJECT_DIR"
 
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Normalize CHART_PATH to point to a file
-if [[ -z "${CHART_PATH:-}" ]]; then
-  if [[ -n "${ENV:-}" && -f "$ROOT_DIR/charts/$ENV/Chart.yaml" ]]; then
-    CHART_PATH="$ROOT_DIR/charts/$ENV/Chart.yaml"
-  elif [[ -f "$ROOT_DIR/Chart.yaml" ]]; then
-    CHART_PATH="$ROOT_DIR/Chart.yaml"
-  else
-    echo "❌ Chart.yaml not found in charts/\$ENV or project root"
-    exit 1
-  fi
-else
-  # Se è una directory, lo trasformiamo in path completo al file
-  if [[ -d "$CHART_PATH" ]]; then
-    CHART_PATH="$CHART_PATH/Chart.yaml"
-  fi
-  if [[ ! -f "$CHART_PATH" ]]; then
-    echo "❌ Chart.yaml not found at: $CHART_PATH"
-    exit 1
-  fi
-fi
+CHART_PATH="${CHART_PATH:-Chart.yaml}"
 
 
 
@@ -72,6 +52,11 @@ do
           ;;
     esac
 done
+
+if [[ -n $chart_path ]]; then
+    CHART_PATH=$chart_path
+fi
+
 
 function setupHelmDeps()
 {
