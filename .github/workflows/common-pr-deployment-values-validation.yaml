@@ -35,10 +35,11 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
-      - name: Print tag passed in
+      - name: Print inputs passed in
         run: |
           echo "Using infra_commons_tag: ${{ inputs.infra_commons_tag }}"
           echo "Using strict_kube_linter_checks: ${{ inputs.strict_kube_linter_checks }}"
+          echo "Using environment: ${{ inputs.environment }}"
 
       - name: Checkout scripts repository
         uses: actions/checkout@v4
