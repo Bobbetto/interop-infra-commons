@@ -56,7 +56,7 @@ done
 if [[ -n $chart_path ]]; then
     CHART_PATH=$chart_path
 fi
-echo "Using Chart.yaml path: $CHART_PATH"
+#echo "Using Chart.yaml path: $CHART_PATH"
 
 
 function setupHelmDeps()
