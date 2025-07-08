@@ -126,9 +126,28 @@ fi
 if [[ -n $images_file ]]; then
   OPTIONS=$OPTIONS" -i $images_file"
 fi
+
 if [[ $skip_dep == false ]]; then
-  bash "$SCRIPTS_FOLDER"/helmDep.sh --untar
+  chart_path_resolved="$chart_path"
+  if [[ -z "$chart_path_resolved" ]]; then
+    if [[ -f "$PROJECT_DIR/charts/$ENV/Chart.yaml" ]]; then
+      chart_path_resolved="$PROJECT_DIR/charts/$ENV/Chart.yaml"
+    elif [[ -f "$PROJECT_DIR/Chart.yaml" ]]; then
+      chart_path_resolved="$PROJECT_DIR/Chart.yaml"
+    else
+      echo "❌ Chart.yaml not found in charts/$ENV/ or in root"
+      exit 1
+    fi
+  fi
+
+  echo "🔧 Using chart_path: $chart_path_resolved"
+  bash "$SCRIPTS_FOLDER"/helmDep.sh --untar --chart-path "$chart_path_resolved"
 fi
+
+# if [[ $skip_dep == false ]]; then
+#   bash "$SCRIPTS_FOLDER"/helmDep.sh --untar
+# fi
+
 if [[ -n $chart_path ]]; then
   OPTIONS=$OPTIONS" -cp $chart_path"
 fi
