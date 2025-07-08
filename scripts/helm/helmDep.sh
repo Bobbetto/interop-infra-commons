@@ -5,6 +5,7 @@ help() {
     echo "Usage:
         [ -u | --untar ] Untar downloaded charts
         [ -v | --verbose ] Show debug messages
+        [ -cp | --chart-path ] Path to Chart.yaml (default: ./Chart.yaml)
         [ -h | --help ] This help"
     exit 2
 }
@@ -13,7 +14,7 @@ PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
 ROOT_DIR="$PROJECT_DIR"
 
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
+CHART_PATH="${CHART_PATH:-Chart.yaml}"
 
 args=$#
 untar=false
@@ -58,7 +59,7 @@ function setupHelmDeps()
     if [[ $verbose == true ]]; then
         echo "Copying Chart.yaml to charts"
     fi
-    cp Chart.yaml charts/
+    cp "$CHART_PATH" charts/Chart.yaml
     # Execute helm commands
     echo "# Helm dependencies setup #"
     echo "-- Add PagoPA eks repos --"

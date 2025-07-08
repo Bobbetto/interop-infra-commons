@@ -16,6 +16,7 @@ help()
         [ -o | --output ] Default output to predefined dir. Otherwise set to "console" to print linting output on terminal
         [ -c | --clean ] Clean files and directories after script successfull execution
         [ -sd | --skip-dep ] Skip Helm dependencies setup
+        [ -cp | --chart-path ] Path to Chart.yaml (default: ./Chart.yaml)
         [ -h | --help ] This help"
     exit 2
 }
@@ -28,6 +29,7 @@ post_clean=false
 output_redirect=""
 skip_dep=false
 images_file=""
+chart_path=""
 
 step=1
 for (( i=0; i<$args; i+=$step ))
@@ -56,7 +58,7 @@ do
           ;;
         -i | --image )
           images_file=$2
-          
+
           step=2
           shift 2
           ;;
@@ -85,6 +87,12 @@ do
           step=1
           shift 1
           ;;
+        -cp | --chart-path )
+          [[ "${2:-}" ]] || "When specified, chart path cannot be null" || help
+          chart_path=$2
+          step=2
+          shift 2
+          ;;
         -h | --help )
           help
           ;;
@@ -105,7 +113,7 @@ if [[ -z $microservice || $microservice == "" ]]; then
   help
 fi
 if [[ $skip_dep == false ]]; then
-  bash "$SCRIPTS_FOLDER"/helmDep.sh --untar
+  bash "$SCRIPTS_FOLDER"/helmDep.sh --untar --chart-path "$chart_path"
 fi
 
 VALID_CONFIG=$(isMicroserviceEnvConfigValid $microservice $environment)
@@ -132,18 +140,23 @@ fi
 # Find image version and digest
 . "$SCRIPTS_FOLDER"/image-version-reader-v2.sh -e $environment -m $microservice $IMAGE_VERSION_READER_OPTIONS
 
+chart_location=$(dirname "$chart_path")
+
 LINT_CMD="helm lint "
 if [[ $enable_debug == true ]]; then
     LINT_CMD=$LINT_CMD"--debug "
 fi
 
+LINT_CMD+=" \"$chart_location\""
+LINT_CMD+=" -f \"$ROOT_DIR/commons/$ENV/values-microservice.compiled.yaml\""
+LINT_CMD+=" -f \"$ROOT_DIR/microservices/$microservice/$ENV/values.yaml\""
+LINT_CMD+=" --set enableLookup=false"
+LINT_CMD+=" $OUTPUT_TO"
+
 OUTPUT_TO="> \"$OUT_DIR/$microservice.out.yaml\""
 if [[ $output_redirect == "console" ]]; then
   OUTPUT_TO=""
 fi
-
-
-LINT_CMD=$LINT_CMD" \"$ROOT_DIR/charts/interop-eks-microservice-chart\" -f \"$ROOT_DIR/commons/$ENV/values-microservice.compiled.yaml\" -f \"$ROOT_DIR/microservices/$microservice/$ENV/values.yaml\" --set enableLookup=false $OUTPUT_TO"
 
 eval $LINT_CMD
 

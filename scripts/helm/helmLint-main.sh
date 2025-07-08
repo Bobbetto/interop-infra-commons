@@ -18,6 +18,7 @@ help()
         [ -o | --output ] Default output to predefined dir. Otherwise set to "console" to print linting output on terminal
         [ -c | --clean ] Clean files and directories after scripts successfull execution
         [ -sd | --skip-dep ] Skip Helm dependencies setup
+        [ -cp | --chart-path ] Path to Chart.yaml (default: ./Chart.yaml)
         [ -h | --help ] This help"
     exit 2
 }
@@ -31,6 +32,7 @@ post_clean=false
 output_redirect=""
 skip_dep=false
 images_file=""
+chart_path=""
 
 step=1
 for (( i=0; i<$args; i+=$step ))
@@ -55,7 +57,7 @@ do
           ;;
         -i | --image )
           images_file=$2
-          
+
           step=2
           shift 2
           ;;
@@ -83,6 +85,11 @@ do
           skip_dep=true
           step=1
           shift 1
+          ;;
+        -cp | --chart-path )
+          chart_path=$2
+          step=2
+          shift 2
           ;;
         -h | --help )
           help
@@ -122,18 +129,21 @@ fi
 if [[ $skip_dep == false ]]; then
   bash "$SCRIPTS_FOLDER"/helmDep.sh --untar
 fi
-# Skip further execution of helm deps build and update since we have already done it in the previous line 
+if [[ -n $chart_path ]]; then
+  OPTIONS=$OPTIONS" -cp $chart_path"
+fi
+# Skip further execution of helm deps build and update since we have already done it in the previous line
 OPTIONS=$OPTIONS" -sd"
 
 
 if [[ $lint_microservices == true ]]; then
   echo "Start linting microservices"
   ALLOWED_MICROSERVICES=$(getAllowedMicroservicesForEnvironment "$ENV")
-  
+
   if [[ -z $ALLOWED_MICROSERVICES || $ALLOWED_MICROSERVICES == "" ]]; then
     echo "No microservices found for environment '$ENV'. Skipping microservices linting."
   fi
-  
+
   for CURRENT_SVC in ${ALLOWED_MICROSERVICES//;/ }
   do
     echo "Linting $CURRENT_SVC"
@@ -149,7 +159,7 @@ fi
 if [[ $lint_jobs == true ]]; then
   echo "Start linting cronjobs"
   ALLOWED_CRONJOBS=$(getAllowedCronjobsForEnvironment "$ENV")
-  
+
   if [[ -z $ALLOWED_CRONJOBS || $ALLOWED_CRONJOBS == "" ]]; then
     echo "No cronjobs found for environment '$ENV'. Skipping cronjobs linting."
   fi

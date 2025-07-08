@@ -68,8 +68,15 @@ jobs:
           fi
 
           export PROJECT_DIR=$(pwd)
+          CHART_PATH="./charts/${{ inputs.environment }}"
 
-          $SCRIPTS_FOLDER/helmLint-main.sh --debug --environment ${{ inputs.environment }} --output console $OPTIONS -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
+          $SCRIPTS_FOLDER/helmLint-main.sh \
+          --debug \
+          --environment ${{ inputs.environment }} \
+          --output console \
+          $OPTIONS \
+          --chart-path $CHART_PATH \
+          -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
 
   microservices_validation:
     name: Microservices - Template & Lint
@@ -77,10 +84,10 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+        uses: actions/checkout@v4
 
       - name: Checkout scripts repository
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+        uses: actions/checkout@v4
         with:
           repository: Bobbetto/interop-infra-commons
           path: interop-infra-commons
