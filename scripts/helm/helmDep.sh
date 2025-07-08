@@ -24,7 +24,17 @@ if [[ -z "${CHART_PATH:-}" ]]; then
     echo "❌ Chart.yaml not found in charts/\$ENV or project root"
     exit 1
   fi
+else
+  # Se CHART_PATH è una directory, aggiungiamo /Chart.yaml
+  if [[ -d "$CHART_PATH" ]]; then
+    CHART_PATH="$CHART_PATH/Chart.yaml"
+  fi
+  if [[ ! -f "$CHART_PATH" ]]; then
+    echo "❌ Chart.yaml not found at specified chart-path: $CHART_PATH"
+    exit 1
+  fi
 fi
+
 
 
 args=$#
