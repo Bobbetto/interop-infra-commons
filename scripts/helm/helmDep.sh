@@ -48,6 +48,12 @@ do
         -h | --help )
           help
           ;;
+        -cp | --chart-path )
+            [[ "${2:-}" ]] || "Chart path cannot be null" || help
+          CHART_PATH="$2"
+          step=2
+          shift 2
+          ;;
         *)
           echo "Unexpected option: $1"
           help
