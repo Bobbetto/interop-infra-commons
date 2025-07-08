@@ -100,7 +100,7 @@ do
           ;;
     esac
 done
-
+echo "Arguments: $@"
 
 if [[ -z $environment || $environment == "" ]]; then
   echo "Environment cannot be null"
