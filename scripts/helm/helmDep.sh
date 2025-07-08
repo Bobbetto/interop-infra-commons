@@ -15,6 +15,7 @@ ROOT_DIR="$PROJECT_DIR"
 
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Normalize CHART_PATH to point to a file
 if [[ -z "${CHART_PATH:-}" ]]; then
   if [[ -n "${ENV:-}" && -f "$ROOT_DIR/charts/$ENV/Chart.yaml" ]]; then
     CHART_PATH="$ROOT_DIR/charts/$ENV/Chart.yaml"
@@ -25,12 +26,12 @@ if [[ -z "${CHART_PATH:-}" ]]; then
     exit 1
   fi
 else
-  # Se CHART_PATH è una directory, aggiungiamo /Chart.yaml
+  # Se è una directory, lo trasformiamo in path completo al file
   if [[ -d "$CHART_PATH" ]]; then
     CHART_PATH="$CHART_PATH/Chart.yaml"
   fi
   if [[ ! -f "$CHART_PATH" ]]; then
-    echo "❌ Chart.yaml not found at specified chart-path: $CHART_PATH"
+    echo "❌ Chart.yaml not found at: $CHART_PATH"
     exit 1
   fi
 fi
