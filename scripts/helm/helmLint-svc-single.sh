@@ -123,6 +123,7 @@ if [[ -z $VALID_CONFIG || $VALID_CONFIG == "" ]]; then
 fi
 
 ENV=$environment
+export ENV=$environment
 MICROSERVICE_DIR=$( echo $microservice | sed  's/-/_/g' )
 OUT_DIR="$ROOT_DIR/out/lint/$ENV/microservice_$MICROSERVICE_DIR"
 if [[ $output_redirect != "console" ]]; then

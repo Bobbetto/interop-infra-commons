@@ -120,6 +120,7 @@ if [[ -z $VALID_CONFIG || $VALID_CONFIG == "" ]]; then
 fi
 
 ENV=$environment
+export ENV=$environment
 JOB_DIR=$( echo $job | sed  's/-/_/g' )
 OUT_DIR="$ROOT_DIR/out/lint/$ENV/job_$JOB_DIR"
 if [[ $output_redirect != "console" ]]; then
