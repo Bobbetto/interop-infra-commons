@@ -16,15 +16,16 @@ ROOT_DIR="$PROJECT_DIR"
 SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ -z "${CHART_PATH:-}" ]]; then
-  if [[ -f "$ROOT_DIR/charts/$ENV/Chart.yaml" ]]; then
+  if [[ -n "${ENV:-}" && -f "$ROOT_DIR/charts/$ENV/Chart.yaml" ]]; then
     CHART_PATH="$ROOT_DIR/charts/$ENV/Chart.yaml"
   elif [[ -f "$ROOT_DIR/Chart.yaml" ]]; then
     CHART_PATH="$ROOT_DIR/Chart.yaml"
   else
-    echo "❌ Chart.yaml not found in charts/$ENV or project root"
+    echo "❌ Chart.yaml not found in charts/\$ENV or project root"
     exit 1
   fi
 fi
+
 
 args=$#
 untar=false
