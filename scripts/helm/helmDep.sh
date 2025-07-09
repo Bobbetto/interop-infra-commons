@@ -17,11 +17,11 @@ SCRIPTS_FOLDER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CHART_PATH="${CHART_PATH:-Chart.yaml}"
 
 
-
 args=$#
 untar=false
 step=1
 verbose=false
+
 # Check args
 for (( i=0; i<$args; i+=$step ))
 do

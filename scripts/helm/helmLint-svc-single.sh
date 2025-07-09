@@ -52,13 +52,11 @@ do
             echo "Allowed values: " $(getAllowedMicroservices)
             help
           fi
-
           step=2
           shift 2
           ;;
         -i | --image )
           images_file=$2
-
           step=2
           shift 2
           ;;
@@ -73,7 +71,6 @@ do
           if [[ $output_redirect != "console" ]]; then
             help
           fi
-
           step=2
           shift 2
           ;;
